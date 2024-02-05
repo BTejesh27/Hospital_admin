@@ -29,7 +29,7 @@ if (isset($_POST['upload'])) {
 
     if ($result->num_rows > 0) {
         // Valid credentials, store the password in a session variable
-        $_SESSION['user_password'] = $password;
+        $_SESSION['user_password'] = $D_id;
 
         // Successful login, redirect to a protected page
         header("Location: index.php");

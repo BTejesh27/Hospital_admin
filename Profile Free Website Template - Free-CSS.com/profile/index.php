@@ -1,18 +1,4 @@
-<?php
-session_start(); // Start the session
 
-// Check if the user is logged in
-if (!isset($_SESSION['user_password'])) {
-    // User is not logged in, redirect to login page
-    header("Location: login.php");
-    exit;
-}
-
-// Continue with the rest of your index.php code
-
-// You can also use $_SESSION['user_password'] to access the user's password if needed
-$userPassword = $_SESSION['user_password'];
-?>
 <!DOCTYPE HTML>
 <html>
 	<head>
@@ -83,8 +69,53 @@ $userPassword = $_SESSION['user_password'];
 					<div class="display-t js-fullheight">
 						<div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
 							<div class="profile-thumb" style="background: url(images/user-3.jpg);"></div>
-							<h1><span>Louie Jie Mahusay</span></h1>
-							<h3><span>Web Developer / Photographer</span></h3>
+							
+							<?php
+    session_start();
+
+    // Database connection credentials
+    $host = 'localhost';
+    $username = 'root';
+    $password = '';
+    $database = 'hospital_praj';
+
+    $conn = new mysqli($host, $username, $password, $database);
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    if (!isset($_SESSION['user_password'])) {
+        // User is not logged in, redirect to login page
+        header("Location: login.php");
+        exit;
+    }
+
+    $userPassword = $_SESSION['user_password']; // Corrected variable name
+
+    $stmt = $conn->prepare("SELECT D_name, D_number FROM doctors WHERE D_id = ?");
+    $stmt->bind_param("s", $userPassword);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if (!$result) {
+        die("Error in the query: " . $conn->error);
+    }
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $name = $row['D_name'];
+        $number = $row['D_number'];
+
+        echo "<h1>Welcome, $name!</h1>";
+        echo "<p>Your contact number is: $number</p>";
+    }
+
+    $stmt->close();
+    $conn->close();
+    ?>
+
 							<h1>hello</h1>
 							<p>
 								<ul class="fh5co-social-icons">
