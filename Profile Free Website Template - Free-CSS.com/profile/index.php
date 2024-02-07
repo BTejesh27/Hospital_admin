@@ -109,28 +109,309 @@
         $number = $row['D_number'];
 
         echo "<h1>Welcome, $name!</h1>";
-        echo "<p>Your contact number is: $number</p>";
+        // echo "<p>Your contact number is: $number</p>";
     }
 
     $stmt->close();
     $conn->close();
     ?>
 
-							<h1>hello</h1>
+							<h1>YOUR SCHEDULE</h1>
 							<p>
-								<ul class="fh5co-social-icons">
-									<li><a href="#"><i class="icon-twitter2"></i></a></li>
-									<li><a href="#"><i class="icon-facebook2"></i></a></li>
-									<li><a href="#"><i class="icon-linkedin2"></i></a></li>
-									<li><a href="#"><i class="icon-dribbble2"></i></a></li>
-								</ul>
-							</p>
+								
+							<style>
+        /* Define the CSS for the booked class */
+        .booked {
+            background-color: green;
+            color: white; /* Change text color for better contrast */
+        }
+
+        /* Basic table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px; /* Add some space below the table */
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2; /* Light gray background for table headers */
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2; /* Alternate row background color */
+        }
+
+        /* Center align the table */
+        .table-container {
+            text-align: center;
+            margin: 0 auto;
+            max-width: 800px; /* Adjust the maximum width as needed */
+        }
+    </style>
+	 <div class="table-container" >
+	 <?php
+// Database connection details
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "hospital_praj";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Escape the session variable to prevent SQL injection
+$tableName = mysqli_real_escape_string($conn, $_SESSION['user_password']);
+
+// Query to select booked slots from the specified table
+$query = "SELECT `date`, 
+            `9-10`,
+            `10-11`,
+            `11-12`,
+            `12-1`,
+            `1-2`,
+            `2-3`
+          FROM `$tableName`";
+
+// Execute the query
+$result = $conn->query($query);
+
+// Check if there are any rows returned
+if ($result->num_rows > 0) {
+    // Output the table header
+    echo "<table border='1'>";
+    echo "<tr><th>Date</th><th>9-10</th><th>10-11</th><th>11-12</th><th>12-1</th><th>1-2</th><th>2-3</th></tr>";
+
+    // Output data of each row
+    while ($row = $result->fetch_assoc()) {
+        echo "<tr>";
+        echo "<td>" . $row['date'] . "</td>";
+        echo "<td class='" . ($row['9-10'] == 'yes' ? 'booked' : '') . "'></td>";
+        echo "<td class='" . ($row['10-11'] == 'yes' ? 'booked' : '') . "'></td>";
+        echo "<td class='" . ($row['11-12'] == 'yes' ? 'booked' : '') . "'></td>";
+        echo "<td class='" . ($row['12-1'] == 'yes' ? 'booked' : '') . "'></td>";
+        echo "<td class='" . ($row['1-2'] == 'yes' ? 'booked' : '') . "'></td>";
+        echo "<td class='" . ($row['2-3'] == 'yes' ? 'booked' : '') . "'></td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+} else {
+    // Output a message if no rows found
+    echo "No slots booked.";
+}
+
+// Close connection
+$conn->close();
+?>
+
+
+	 </div>
+				
+	 
+</p>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+		<br>
 	</header>
+
+	<div id="fh5co-resume" class="fh5co-bg-color">
+		<div class="container">
+		</div>
+	</div>
+	<style>
+       
+
+        h1 {
+            text-align: center;
+         
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        fieldset {
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        legend {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .success {
+            color: #28a745;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+	
+
+	<div>
+		
+    <h1>Set Appointment Time</h1>
+
+	<form action="" method="post">
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
+
+    <fieldset>
+        <legend>Select Time Slot(s):</legend>
+
+        <?php
+        // Database connection details
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
+        $dbname = "hospital_praj";
+
+        // Create connection
+        $conn = new mysqli($servername, $username, $password, $dbname);
+
+        // Check connection
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
+        }
+
+        // Define time slots
+        $timeSlots = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3'];
+
+        // Display checkboxes for each time slot
+        foreach ($timeSlots as $slot) {
+            ?>
+            <label>
+                <input type="checkbox" name="time_slot[]" value="<?php echo $slot; ?>"><?php echo $slot; ?>
+            </label>
+            <?php
+        }
+
+        // Close connection
+        $conn->close();
+        ?>
+
+    </fieldset>
+
+    <button type="submit">Submit</button>
+</form>
+
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $date = $_POST["date"];
+    $selectedTimeSlots = isset($_POST["time_slot"]) ? $_POST["time_slot"] : [];
+
+    // Database connection details
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "hospital_praj";
+
+    // Create connection
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    // Escape user inputs to prevent SQL injection
+    $date = mysqli_real_escape_string($conn, $date);
+
+    // Session variable for table name
+    $table_name = $_SESSION['user_password'];
+
+    // Check if appointment already exists for this date
+    $existingAppointment = $conn->query("SELECT * FROM `$table_name` WHERE `date` = '$date'")->fetch_assoc();
+
+    if ($existingAppointment) {
+        // Update existing appointment
+        $updateColumns = [];
+        foreach ($selectedTimeSlots as $slot) {
+            $updateColumns[] = "`$slot` = 'yes'";
+        }
+
+        $updateQuery = "UPDATE `$table_name` SET " . implode(",", $updateColumns) . " WHERE `date` = '$date'";
+
+        if ($conn->query($updateQuery) === TRUE) {
+            echo "<p class='success'>Appointment updated successfully!</p>";
+        } else {
+            echo "<p class='error'>Error updating appointment: " . $conn->error . "</p>";
+        }
+    } else {
+        // Insert new appointment
+        $sqlColumns = "`date`," . implode(",", array_map(function ($slot) {
+            return "`$slot`";
+        }, $selectedTimeSlots));
+
+        $sqlValues = "'$date'," . implode(",", array_fill(0, count($selectedTimeSlots), "'yes'"));
+
+        $insertQuery = "INSERT INTO `$table_name` ($sqlColumns) VALUES ($sqlValues)";
+
+        if ($conn->query($insertQuery) === TRUE) {
+            echo "<p class='success'>Appointment scheduled successfully!</p>";
+        } else {
+            echo "<p class='error'>Error scheduling appointment: " . $conn->error . "</p>";
+        }
+    }
+
+    // Close connection
+    $conn->close();
+}
+?>
+</div>
 
 	<div id="fh5co-about" class="animate-box">
 		<div class="container">
@@ -365,7 +646,7 @@
 		</div>
 	</div>
 
-	<div id="fh5co-skills" class="animate-box">
+	<!-- <div id="fh5co-skills" class="animate-box">
 		<div class="container">
 			<div class="row">
 				<div class="col-md-8 col-md-offset-2 text-center fh5co-heading">
@@ -678,7 +959,7 @@
 	<div class="gototop js-top">
 		<a href="#" class="js-gotop"><i class="icon-arrow-up22"></i></a>
 	</div>
-	
+	 -->
 	<!-- jQuery -->
 	<script src="js/jquery.min.js"></script>
 	<!-- jQuery Easing -->
