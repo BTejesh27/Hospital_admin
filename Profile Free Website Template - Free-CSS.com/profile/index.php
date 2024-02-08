@@ -61,7 +61,7 @@
 	<div class="fh5co-loader"></div>
 	
 	<div id="page">	
-		<h1>hi</h1>
+		
 	<header id="fh5co-header" class="fh5co-cover js-fullheight" role="banner" style="background-image:url(images/cover_bg_3.jpg);" data-stellar-background-ratio="0.5">
 		<div class="overlay"></div>
 		<div class="container">
@@ -154,68 +154,77 @@
             max-width: 800px; /* Adjust the maximum width as needed */
         }
     </style>
-	 <div class="table-container" >
-	 <?php
-// Database connection details
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "hospital_praj";
+<div class="table-container">
+    <?php
+  
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+    // Database connection details
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "hospital_praj";
 
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+    // Create connection
+    $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Escape the session variable to prevent SQL injection
-$tableName = mysqli_real_escape_string($conn, $_SESSION['user_password']);
-
-// Query to select booked slots from the specified table
-$query = "SELECT `date`, 
-            `9-10`,
-            `10-11`,
-            `11-12`,
-            `12-1`,
-            `1-2`,
-            `2-3`
-          FROM `$tableName`";
-
-// Execute the query
-$result = $conn->query($query);
-
-// Check if there are any rows returned
-if ($result->num_rows > 0) {
-    // Output the table header
-    echo "<table border='1'>";
-    echo "<tr><th>Date</th><th>9-10</th><th>10-11</th><th>11-12</th><th>12-1</th><th>1-2</th><th>2-3</th></tr>";
-
-    // Output data of each row
-    while ($row = $result->fetch_assoc()) {
-        echo "<tr>";
-        echo "<td>" . $row['date'] . "</td>";
-        echo "<td class='" . ($row['9-10'] == 'yes' ? 'booked' : '') . "'></td>";
-        echo "<td class='" . ($row['10-11'] == 'yes' ? 'booked' : '') . "'></td>";
-        echo "<td class='" . ($row['11-12'] == 'yes' ? 'booked' : '') . "'></td>";
-        echo "<td class='" . ($row['12-1'] == 'yes' ? 'booked' : '') . "'></td>";
-        echo "<td class='" . ($row['1-2'] == 'yes' ? 'booked' : '') . "'></td>";
-        echo "<td class='" . ($row['2-3'] == 'yes' ? 'booked' : '') . "'></td>";
-        echo "</tr>";
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
     }
-    echo "</table>";
-} else {
-    // Output a message if no rows found
-    echo "No slots booked.";
-}
 
-// Close connection
-$conn->close();
-?>
+    // Escape the session variable to prevent SQL injection
+    $d_id = $_SESSION['user_password'];
+
+    // Define time slots
+    $timeSlots = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3', '3-4', '4-5'];
+
+    // Construct the select query dynamically based on time slots
+    $selectColumns = "`date`";
+    foreach ($timeSlots as $slot) {
+        $selectColumns .= ", `$slot`";
+    }
+
+    // Query to select booked slots from the "app" table based on d_id and ordered by date
+    $query = "SELECT $selectColumns
+            FROM `app`
+            WHERE `d_id` = '$d_id'
+            ORDER BY `date`";
+
+    // Execute the query
+    $result = $conn->query($query);
+
+    // Check if there are any rows returned
+    if ($result->num_rows > 0) {
+        // Output the table header
+        echo "<table border='1'>";
+        echo "<tr><th>Date</th>";
+        foreach ($timeSlots as $slot) {
+            echo "<th>$slot</th>";
+        }
+        echo "</tr>";
+
+        // Output data of each row
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row['date'] . "</td>";
+            foreach ($timeSlots as $slot) {
+                echo "<td class='" . ($row[$slot] == 'yes' ? 'booked' : '') . "'></td>";
+            }
+            echo "</tr>";
+        }
+        echo "</table>";
+    } else {
+        // Output a message if no rows found
+        echo "No slots Schedule.";
+    }
+
+    // Close connection
+    $conn->close();
+    ?>
+</div>
 
 
-	 </div>
+
 				
 	 
 </p>
