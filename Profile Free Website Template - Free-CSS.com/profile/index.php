@@ -303,17 +303,63 @@ $conn->close();
 	
 
 	<div>
-		
     <h1>Set Appointment Time</h1>
 
-	<form action="" method="post">
-    <label for="date">Date:</label>
-    <input type="date" id="date" name="date" required>
+    <form action="" method="post">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required>
 
-    <fieldset>
-        <legend>Select Time Slot(s):</legend>
+        <fieldset>
+            <legend>Select Time Slot(s):</legend>
 
-        <?php
+            <?php
+            // Database connection details
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "hospital_praj";
+
+            // Create connection
+            $conn = new mysqli($servername, $username, $password, $dbname);
+
+            // Check connection
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            }
+
+            // Define time slots
+            $timeSlots = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3', '3-4', '4-5'];
+
+            // Display checkboxes for each time slot
+            foreach ($timeSlots as $slot) {
+                ?>
+                <label>
+                    <input type="checkbox" name="time_slot[]" value="<?php echo $slot; ?>"><?php echo $slot; ?>
+                </label>
+                <?php
+            }
+
+            // Close connection
+            $conn->close();
+            ?>
+
+        </fieldset>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <?php
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        // Start the session
+      
+
+        // Get d_id from session
+        $d_id = $_SESSION['user_password'];
+
+        // Get date and selected time slots from form
+        $date = $_POST["date"];
+        $selectedTimeSlots = isset($_POST["time_slot"]) ? $_POST["time_slot"] : [];
+
         // Database connection details
         $servername = "localhost";
         $username = "root";
@@ -328,91 +374,53 @@ $conn->close();
             die("Connection failed: " . $conn->connect_error);
         }
 
-        // Define time slots
-        $timeSlots = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3'];
+        // Escape user inputs to prevent SQL injection
+        $date = mysqli_real_escape_string($conn, $date);
 
-        // Display checkboxes for each time slot
-        foreach ($timeSlots as $slot) {
-            ?>
-            <label>
-                <input type="checkbox" name="time_slot[]" value="<?php echo $slot; ?>"><?php echo $slot; ?>
-            </label>
-            <?php
+        // Session variable for table name
+        $table_name = "app";
+
+        // Check if appointment already exists for this date
+        $existingAppointment = $conn->query("SELECT * FROM `$table_name` WHERE `date` = '$date' AND `d_id` = '$d_id'")->fetch_assoc();
+
+        if ($existingAppointment) {
+            // Update existing appointment
+            $updateColumns = [];
+            foreach ($selectedTimeSlots as $slot) {
+                $updateColumns[] = "`$slot` = 'yes'";
+            }
+
+            $updateQuery = "UPDATE `$table_name` SET " . implode(",", $updateColumns) . " WHERE `date` = '$date' AND `d_id` = '$d_id'";
+
+            if ($conn->query($updateQuery) === TRUE) {
+                echo "<p class='success'>Appointment updated successfully!</p>";
+            } else {
+                echo "<p class='error'>Error updating appointment: " . $conn->error . "</p>";
+            }
+        } else {
+            // Insert new appointment
+            $sqlColumns = "`d_id`, `date`," . implode(",", array_map(function ($slot) {
+                return "`$slot`";
+            }, $selectedTimeSlots));
+
+            $sqlValues = "'$d_id', '$date'," . implode(",", array_fill(0, count($selectedTimeSlots), "'yes'"));
+
+            $insertQuery = "INSERT INTO `$table_name` ($sqlColumns) VALUES ($sqlValues)";
+
+            if ($conn->query($insertQuery) === TRUE) {
+                echo "<p class='success'>Appointment scheduled successfully!</p>";
+            } else {
+                echo "<p class='error'>Error scheduling appointment: " . $conn->error . "</p>";
+            }
         }
 
         // Close connection
         $conn->close();
-        ?>
-
-    </fieldset>
-
-    <button type="submit">Submit</button>
-</form>
-
-<?php
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $date = $_POST["date"];
-    $selectedTimeSlots = isset($_POST["time_slot"]) ? $_POST["time_slot"] : [];
-
-    // Database connection details
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "hospital_praj";
-
-    // Create connection
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    // Check connection
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
     }
-
-    // Escape user inputs to prevent SQL injection
-    $date = mysqli_real_escape_string($conn, $date);
-
-    // Session variable for table name
-    $table_name = $_SESSION['user_password'];
-
-    // Check if appointment already exists for this date
-    $existingAppointment = $conn->query("SELECT * FROM `$table_name` WHERE `date` = '$date'")->fetch_assoc();
-
-    if ($existingAppointment) {
-        // Update existing appointment
-        $updateColumns = [];
-        foreach ($selectedTimeSlots as $slot) {
-            $updateColumns[] = "`$slot` = 'yes'";
-        }
-
-        $updateQuery = "UPDATE `$table_name` SET " . implode(",", $updateColumns) . " WHERE `date` = '$date'";
-
-        if ($conn->query($updateQuery) === TRUE) {
-            echo "<p class='success'>Appointment updated successfully!</p>";
-        } else {
-            echo "<p class='error'>Error updating appointment: " . $conn->error . "</p>";
-        }
-    } else {
-        // Insert new appointment
-        $sqlColumns = "`date`," . implode(",", array_map(function ($slot) {
-            return "`$slot`";
-        }, $selectedTimeSlots));
-
-        $sqlValues = "'$date'," . implode(",", array_fill(0, count($selectedTimeSlots), "'yes'"));
-
-        $insertQuery = "INSERT INTO `$table_name` ($sqlColumns) VALUES ($sqlValues)";
-
-        if ($conn->query($insertQuery) === TRUE) {
-            echo "<p class='success'>Appointment scheduled successfully!</p>";
-        } else {
-            echo "<p class='error'>Error scheduling appointment: " . $conn->error . "</p>";
-        }
-    }
-
-    // Close connection
-    $conn->close();
-}
-?>
+    ?>
 </div>
+
+
 
 	<div id="fh5co-about" class="animate-box">
 		<div class="container">
