@@ -427,7 +427,6 @@
 			}
 		</style>
 
-
 		<div>
 			<h1>Set Appointment Time</h1>
 
