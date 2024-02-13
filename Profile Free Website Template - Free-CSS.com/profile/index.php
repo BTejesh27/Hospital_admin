@@ -81,7 +81,8 @@
                                     .booked {
                                         background-color: green;
                                         color: white;
-                                    }                                    table {
+                                    }                                    
+                                    table {
                                         width: 100%;
                                         border-collapse: collapse;
                                     }
@@ -92,7 +93,8 @@
                                     }
                                     th {
                                         background-color: #f2f2f2;
-                                    }                                  tr:nth-child(even) {
+                                    }
+                                    tr:nth-child(even) {
                                         background-color: #f2f2f2;
                                     }
                                     .table-container {
@@ -145,7 +147,7 @@
                                 ?>
                             </div>
 		</div>
-		<style>			h1 {
+        		<style>			h1 {
 				text-align: center;
 			}
             form {
