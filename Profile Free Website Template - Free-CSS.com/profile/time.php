@@ -1,13 +1,3 @@
-<h2>Book Appointment</h2>
-<form action="" method="post">
-    <label for="date">Select Date:</label>
-    <input type="date" id="date" name="date" required>
-    <label for="time">Select Time Slot:</label>
-    <select id="time" name="time" required>
-        <!-- Time slots will be populated dynamically based on selected date -->
-    </select>
-    <button type="submit" name="submit">Book Slot</button>
-</form>
 <?php
 // Start the session
 session_start();
@@ -27,10 +17,41 @@ if ($conn->connect_error) {
 }
 
 // Retrieve doctor's ID from session variable
-$doctor_id = $_SESSION['user_password']; // Replace 'user_password' with your actual session variable
+$doctor_id = $_SESSION['user_password'];
 
-// Handle form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+// Retrieve doctor's slots based on doctor's ID
+$query = "SELECT * FROM `app` WHERE `d_id` = '$doctor_id'";
+$result = $conn->query($query);
+
+$doctorSlots = array();
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $date = $row['date'];
+        foreach ($row as $key => $value) {
+            if ($key !== 'd_id' && $key !== 'date' && $value === 'yes') {
+                $time = $key;
+                $doctorSlots[$date][] = $time;
+            }
+        }
+    }
+}
+
+// Function to generate time slots with a 10-minute interval from 9 AM to 5 PM
+function generateTimeSlots() {
+    $timeSlots = array();
+    $start = strtotime('09:00');
+    $end = strtotime('17:00');
+    $interval = 10 * 60; // 10 minutes
+
+    for ($i = $start; $i <= $end; $i += $interval) {
+        $timeSlots[] = date('H:i', $i);
+    }
+
+    return $timeSlots;
+}
+
+// Insert booking data into the database when the form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Get the form data
     $date = $_POST["date"];
     $time = $_POST["time"];
@@ -38,12 +59,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     // Insert the form data into the patient_booking table
     $sql = "INSERT INTO patient_booking (patient_id, d_id, date, time) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    
-    // Assuming patient_id is available in session, replace with actual session variable
-    $patient_id = 111; // Example patient ID, replace with your actual session variable
 
     // Bind parameters
     $stmt->bind_param("iiss", $patient_id, $doctor_id, $date, $time);
+
+    // Set patient_id (assuming it's available in the session, you may need to adjust)
+    $patient_id = 445;
 
     // Execute the statement
     if ($stmt->execute()) {
@@ -54,6 +75,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
 
     // Close statement
     $stmt->close();
+}
+
+// Display available slots
+if (!empty($doctorSlots)) {
+    echo "<h2>Book Appointment</h2>";
+    echo "<form action='" . htmlspecialchars($_SERVER["PHP_SELF"]) . "' method='post'>"; // Submit form to the same page
+    echo "<label for='date'>Select Date:</label>";
+    echo "<input type='date' id='date' name='date' required>";
+    echo "<label for='time'>Select Time Slot:</label>";
+    echo "<select id='time' name='time' required>";
+    $timeSlots = generateTimeSlots();
+    foreach ($timeSlots as $time) {
+        echo "<option value='$time'>$time</option>";
+    }
+    echo "</select>";
+    echo "<button type='submit' name='submit'>Book Slot</button>";
+    echo "</form>";
+} else {
+    echo "No slots available.";
 }
 
 // Close connection
