@@ -67,108 +67,8 @@ if (isset($_POST['register'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Tennis Tournament Admin</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f4f4f4;
-        }
-
-        .login-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-
-        label {
-            margin-bottom: 8px;
-            color: #555;
-        }
-
-        input {
-            padding: 10px;
-            margin-bottom: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        button {
-            padding: 12px;
-            background-color: #3498db;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-        }
-
-        .register-link {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .register-link a {
-            color: #3498db;
-            text-decoration: none;
-        }
-        .login-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-
-        .register-form {
-            display: none; /* Initially hide the registration form */
-        }
-
-        .register-link {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .register-link a {
-            color: #3498db;
-            text-decoration: none;
-        }
-    
-    </style>
+    <link rel="stylesheet" href="css/login.css">
+    <title>login</title>
 </head>
 
 <body>
@@ -193,30 +93,40 @@ if (isset($_POST['register'])) {
 
             <button type="submit" name="upload">Login</button>
         </form>
-
+        
         <!-- Registration link -->
         <p class="register-link">Don't have an account? <a href="#" onclick="toggleRegistrationForm()">Register</a></p>
+    </div>
 
         <!-- Registration form (initially hidden) -->
-        <form action="" method="post" style="display: none;" id="registrationForm">
-            <h2>Register</h2>
-            <label for="D_id">ID:</label>
-            <input type="text" id="D_id" name="D_id" required>
-
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <button type="submit" name="register">Register</button>
-        </form>
+        
+        <div class="registrationForm" style="display: none;">
+            <form action="" method="post">
+                <h2>Register</h2>
+                <label for="D_id">ID:</label>
+                <input type="text" id="D_id" name="D_id" required>
+                
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                
+                <label for="mobile_no">Mobile Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" maxlength="10" required>
+                <button onclick="sendSMS()">Get OTP</button><br>
+                
+                <div class='show' style="display:none">
+                    <label for="OTP">Enter OTP:</label>
+                    <input type="text" id="OTP" name="OTP" maxlength="6" required>
+                    <button type="button" onclick="validateOtp()" >Submit OTP</button>
+                    <p id="msg"></p>
+                </div>
+                
+                <button class="reg_btn" type="submit" name="register" style='display:none'>Register</button>
+                <p class="register-link">Do you have an account? <a href="#" onclick="toggleRegistrationForm()">login</a></p>
+            </form>
+        </div>
 
         <!-- JavaScript to toggle form visibility -->
-        <script>
-            function toggleRegistrationForm() {
-                var registrationForm = document.getElementById('registrationForm');
-                registrationForm.style.display = (registrationForm.style.display === 'none') ? 'block' : 'none';
-            }
-        </script>
-    </div>
+        <script src="js/login.js"></script>
 </body>
 
 </html>
