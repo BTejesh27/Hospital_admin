@@ -201,8 +201,8 @@ if (!isset($_SESSION['user_id'])) {
     }
 
     .available {
-        background-color:crimson;
-        color: black;
+        background-color:black;
+        color: white;
     }
 
     table {
@@ -268,11 +268,10 @@ if (!isset($_SESSION['user_id'])) {
             echo "<td>" . $row['date'] . "</td>";
             foreach ($timeSlots as $timeSlot) {
                 if ($row[$timeSlot] == 'yes') {
-                    $status = 'booked';
+                    echo "<td class='booked'>$timeSlot</td>";
                 } else {
-                    $status = 'available';
+                    echo "<td>Not scheduled</td>";
                 }
-                echo "<td class='$status'>$timeSlot</td>";
             }
             echo "</tr>";
         }
@@ -282,6 +281,8 @@ if (!isset($_SESSION['user_id'])) {
     }
     ?>
 </div>
+
+
 
 
     <div>
