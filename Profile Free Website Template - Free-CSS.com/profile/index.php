@@ -46,12 +46,12 @@
 								if ($conn->connect_error) {
 									die("Connection failed: " . $conn->connect_error);
 								}
-								if (!isset($_SESSION['user_password'])) {
+								if (!isset($_SESSION['user_id'])) {
 									// User is not logged in, redirect to login page
 									header("Location: login.php");
 									exit;
 								}
-								$userPassword = $_SESSION['user_password']; // Corrected variable name
+								$userPassword = $_SESSION['user_id']; // Corrected variable name
 								$stmt = $conn->prepare("SELECT D_name, D_number FROM doctors WHERE D_id = ?");
 								$stmt->bind_param("s", $userPassword);
 								$stmt->execute();
@@ -103,49 +103,57 @@
                                         max-width: 800px;
                                     }
                                 </style>
-                            <div class="table-container">
-                                <?php
-                                $servername = "localhost";
-                                $username = "root";
-                                $password = "";
-                                $dbname = "hospital_praj";
-                                $conn = new mysqli($servername, $username, $password, $dbname);
-                                if ($conn->connect_error) {
-                                    die("Connection failed: " . $conn->connect_error);
-                                }
-                                $d_id = $_SESSION['user_password'];
-                                $timeSlots = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3', '3-4', '4-5'];
-                                $selectColumns = "`date`";
-                                foreach ($timeSlots as $slot) {
-                                    $selectColumns .= ", `$slot`";
-                                }
-                                $query = "SELECT $selectColumns
+                    <div class="table-container">
+    <?php
+    // PHP code to fetch and display the initial table content
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "hospital_praj";
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+    $d_id = $_SESSION['user_id'];
+    $timeSlots = ['9-10', '10-11', '11-12', '12-1', '1-2', '2-3', '3-4', '4-5'];
+    $selectColumns = "`date`";
+    foreach ($timeSlots as $slot) {
+        $selectColumns .= ", `$slot`";
+    }
+    $query = "SELECT $selectColumns
         FROM `app`
         WHERE `d_id` = '$d_id'
         ORDER BY `date`";
-                                $result = $conn->query($query);
-                                if ($result->num_rows > 0) {
-                                    echo "<table border='1'>";
-                                    echo "<tr><th>Date</th>";
-                                    foreach ($timeSlots as $slot) {
-                                        echo "<th>$slot</th>";
-                                    }
-                                    echo "</tr>";
-                                    while ($row = $result->fetch_assoc()) {
-                                        echo "<tr>";
-                                        echo "<td>" . $row['date'] . "</td>";
-                                        foreach ($timeSlots as $slot) {
-                                            echo "<td class='" . ($row[$slot] == 'yes' ? 'booked' : '') . "'></td>";
-                                        }
-                                        echo "</tr>";
-                                    }
-                                    echo "</table>";
-                                } else {
-                                    echo "No slots Schedule.";
-                                }
-                                $conn->close();
-                                ?>
-                            </div>
+    $result = $conn->query($query);
+    if ($result->num_rows > 0) {
+        echo "<table border='1' id='appointment-table'>";
+        echo "<tr><th>Date</th>";
+        foreach ($timeSlots as $slot) {
+            echo "<th>$slot</th>";
+        }
+        echo "</tr>";
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row['date'] . "</td>";
+            foreach ($timeSlots as $slot) {
+                echo "<td class='" . ($row[$slot] == 'yes' ? 'booked' : '') . "'></td>";
+            }
+            echo "</tr>";
+        }
+        echo "</table>";
+    } else {
+        echo "No slots Schedule.";
+    }
+    $conn->close();
+    ?>
+</div>
+
+
+
+
+
+
+
 		</div>
         		<style>			h1 {
 				text-align: center;
@@ -203,6 +211,7 @@
 				text-align: center;
 			}
 		</style>
+		<div>
 			<h1>Set Appointment Time</h1>
 			<form action="" method="post">
 				<label for="date">Date:</label>
@@ -233,7 +242,7 @@
 			</form>
 			<?php
 			if ($_SERVER["REQUEST_METHOD"] == "POST") {
-				$d_id = $_SESSION['user_password'];
+				$d_id = $_SESSION['user_id'];
 				$date = $_POST["date"];
 				$selectedTimeSlots = isset($_POST["time_slot"]) ? $_POST["time_slot"] : [];
 				$servername = "localhost";
@@ -274,6 +283,20 @@
 			}
 			?>
 		</div>
+		<!-- <script>
+    function updateTable() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("table-container").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "update_table.php", true);
+        xhttp.send();
+    }
+
+    setInterval(updateTable, 2000); // Refresh every 2 seconds
+</script> -->
 		<script src="js/jquery.min.js"></script>
 		<script src="js/jquery.easing.1.3.js"></script>
 		<script src="js/bootstrap.min.js"></script>

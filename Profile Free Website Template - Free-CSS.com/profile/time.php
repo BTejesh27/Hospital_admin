@@ -17,7 +17,7 @@ if ($conn->connect_error) {
 }
 
 // Retrieve doctor's ID from session variable
-$doctor_id = $_SESSION['user_password'];
+$doctor_id = $_SESSION['user_id'];
 
 // Retrieve doctor's slots based on doctor's ID
 $query = "SELECT * FROM `app` WHERE `d_id` = '$doctor_id'";
