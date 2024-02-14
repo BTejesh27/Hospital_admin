@@ -96,7 +96,7 @@ button[type="submit"]:hover {
     text-align: center;
 }
 </style>
-<!-- <style>
+<style>
         .booked {
             background-color: green;
             color: white;
@@ -122,7 +122,7 @@ button[type="submit"]:hover {
             max-width: 80%;
             overflow-x: auto; /* Add horizontal scroll */
         }
-    </style> -->
+    </style>
 </head>
 <body>
     <div class="fh5co-loader"></div>
@@ -136,6 +136,7 @@ button[type="submit"]:hover {
                             <div class="display-tc js-fullheight animate-box" data-animate-effect="fadeIn">
                                 <div class="profile-thumb" style="background: url(images/user-3.jpg);"></div>
                                 <?php
+                                session_start();
                                 $host = 'localhost';
                                 $username = 'root';
                                 $password = '';
@@ -176,6 +177,7 @@ button[type="submit"]:hover {
         </header>
 
         <?php
+session_start();
 $host = 'localhost';
 $username = 'root';
 $password = '';
@@ -194,95 +196,51 @@ if (!isset($_SESSION['user_id'])) {
 
 
 <h1>YOUR SCHEDULE</h1>
-<style>
-    .booked {
-        background-color: green;
-        color: white;
-    }
-
-    .available {
-        background-color:crimson;
-        color: black;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th,
-    td {
-        padding: 8px;
-        text-align: center;
-    }
-
-    th {
-        background-color:burlywood; /* Update to desired highlight color */
-        color: black; /* Update to desired text color */
-    }
-
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .table-container {
-        text-align: center;
-        margin: 0 auto;
-        max-width: 80%;
-        overflow-x: auto;
-    }
-</style>
-
-<div class="table-container">
-    <?php
-    $d_id = $_SESSION['user_id'];
-    $timeSlots = [
-        '9-9:10', '9:10-9:20', '9:20-9:30', '9:30-9:40', '9:40-9:50',
-        '9:50-10', '10-10:10', '10:10-10:20', '10:20-10:30', '10:30-10:40',
-        '10:40-10:50', '10:50-11', '11-11:10', '11:10-11:20', '11:20-11:30',
-        '11:30-11:40', '11:40-11:50', '11:50-12', '12-12:10', '12:10-12:20',
-        '12:20-12:30', '12:30-12:40', '12:40-12:50', '12:50-1', '1-1:10',
-        '1:10-1:20', '1:20-1:30', '1:30-1:40', '1:40-1:50', '1:50-2', '2-2:10',
-        '2:10-2:20', '2:20-2:30', '2:30-2:40', '2:40-2:50', '2:50-3', '3-3:10',
-        '3:10-3:20', '3:20-3:30', '3:30-3:40', '3:40-3:50', '3:50-4', '4-4:10',
-        '4:10-4:20', '4:20-4:30', '4:30-4:40', '4:40-4:50', '4:50-5'
-    ];
-    $selectColumns = "`date`";
-    foreach ($timeSlots as $timeSlot) {
-        $selectColumns .= ", `$timeSlot`";
-    }
-    $query = "SELECT $selectColumns
-        FROM `app`
-        WHERE `d_id` = '$d_id'
-        ORDER BY `date`";
-    $result = $conn->query($query);
-    if ($result->num_rows > 0) {
-        echo "<table border='1' id='appointment-table'>";
-        echo "<tr><th>Date</th>";
+    <div class="table-container">
+        <?php
+        $d_id = $_SESSION['user_id'];
+        $timeSlots = [
+            '9-9:10', '9:10-9:20', '9:20-9:30', '9:30-9:40', '9:40-9:50',
+            '9:50-10', '10-10:10', '10:10-10:20', '10:20-10:30', '10:30-10:40',
+            '10:40-10:50', '10:50-11', '11-11:10', '11:10-11:20', '11:20-11:30',
+            '11:30-11:40', '11:40-11:50', '11:50-12', '12-12:10', '12:10-12:20',
+            '12:20-12:30', '12:30-12:40', '12:40-12:50', '12:50-1', '1-1:10',
+            '1:10-1:20', '1:20-1:30', '1:30-1:40', '1:40-1:50', '1:50-2', '2-2:10',
+            '2:10-2:20', '2:20-2:30', '2:30-2:40', '2:40-2:50', '2:50-3', '3-3:10',
+            '3:10-3:20', '3:20-3:30', '3:30-3:40', '3:40-3:50', '3:50-4', '4-4:10',
+            '4:10-4:20', '4:20-4:30', '4:30-4:40', '4:40-4:50', '4:50-5'
+        ];
+        $selectColumns = "`date`";
         foreach ($timeSlots as $timeSlot) {
-            echo "<th>$timeSlot</th>";
+            $selectColumns .= ", `$timeSlot`";
         }
-        echo "</tr>";
-        while ($row = $result->fetch_assoc()) {
-            echo "<tr>";
-            echo "<td>" . $row['date'] . "</td>";
+        $query = "SELECT $selectColumns
+            FROM `app`
+            WHERE `d_id` = '$d_id'
+            ORDER BY `date`";
+        $result = $conn->query($query);
+        if ($result->num_rows > 0) {
+            echo "<table border='1' id='appointment-table'>";
+            echo "<tr><th>Date</th>";
             foreach ($timeSlots as $timeSlot) {
-                if ($row[$timeSlot] == 'yes') {
-                    $status = 'booked';
-                } else {
-                    $status = 'available';
-                }
-                echo "<td class='$status'>$timeSlot</td>";
+                echo "<th>$timeSlot</th>";
             }
             echo "</tr>";
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['date'] . "</td>";
+                foreach ($timeSlots as $timeSlot) {
+                    $status = $row[$timeSlot] == 'yes' ? 'booked' : '';
+                    echo "<td class='$status'>$timeSlot</td>";
+                }
+                echo "</tr>";
+            }
+            echo "</table>";
+        } else {
+            echo "No slots Schedule.";
         }
-        echo "</table>";
-    } else {
-        echo "No slots Schedule.";
-    }
-    ?>
-</div>
-
+        ?>
+    </div>
 
     <div>
         <h1>Set Appointment Time</h1>
