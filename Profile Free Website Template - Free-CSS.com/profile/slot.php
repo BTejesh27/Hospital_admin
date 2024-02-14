@@ -1,158 +1,170 @@
 <?php
-// Start the session
 session_start();
 
-// Check if the doctor's ID is set in the session
+// Check if doctor is logged in
 if (!isset($_SESSION['user_id'])) {
-    // Redirect to login or set the doctor's ID using another method
-    header('Location: login.php');
-    exit();
+    header("Location: login.php");
+    exit;
 }
 
-// Initialize $conn with your database connection
-$conn = mysqli_connect("localhost", "root", "", "hospital_praj");
-
-// Check if the connection was successful
-if (!$conn) {
-    // Handle the connection error
-    die("Connection failed: " . mysqli_connect_error());
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "hospital_praj";
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// Get the doctor's ID from the session
-$doctor_id = $_SESSION['user_id'];
+// Fetch available slots for the doctor from the app table
+$d_id = $_SESSION['user_id'];
+$query = "SELECT `date`, 
+                 `9-9:10`, `9:10-9:20`, `9:20-9:30`, `9:30-9:40`, `9:40-9:50`, `9:50-10`, 
+                 `10-10:10`, `10:10-10:20`, `10:20-10:30`, `10:30-10:40`, `10:40-10:50`, `10:50-11`, 
+                 `11-11:10`, `11:10-11:20`, `11:20-11:30`, `11:30-11:40`, `11:40-11:50`, `11:50-12`, 
+                 `12-12:10`, `12:10-12:20`, `12:20-12:30`, `12:30-12:40`, `12:40-12:50`, `12:50-1`, 
+                 `1-1:10`, `1:10-1:20`, `1:20-1:30`, `1:30-1:40`, `1:40-1:50`, `1:50-2`, 
+                 `2-2:10`, `2:10-2:20`, `2:20-2:30`, `2:30-2:40`, `2:40-2:50`, `2:50-3`, 
+                 `3-3:10`, `3:10-3:20`, `3:20-3:30`, `3:30-3:40`, `3:40-3:50`, `3:50-4`, 
+                 `4-4:10`, `4:10-4:20`, `4:20-4:30`, `4:30-4:40`, `4:40-4:50`, `4:50-5` 
+          FROM `app` 
+          WHERE `d_id` = '$d_id'";
 
-// Display the calendar to select the date
-if (!isset($_POST['date'])) {
-    ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Select Date</title>
-    </head>
-    <body>
-        <h1>Select Date</h1>
-        <form method="POST">
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required><br><br>
-            <button type="submit">Select</button>
-        </form>
-    </body>
-    </html>
-    <?php
+$result = $conn->query($query);
+if (!$result) {
+    echo "Error: " . $conn->error;
 } else {
-    // Get the selected date
-    $date = $_POST['date'];
-    $date_escaped = mysqli_real_escape_string($conn, $date);
-
-    // Retrieve all slots for the selected date and doctor ID
-    $select_query = "SELECT * FROM app WHERE date = '$date_escaped' AND d_id = '$doctor_id'";
-    $result = mysqli_query($conn, $select_query);
-
-    // Fetch the record for the selected date and doctor ID
-    $record = mysqli_fetch_assoc($result);
-
-    // Render form to select slots
-    renderSlotForm($date, $record);
+    echo "Number of rows: " . $result->num_rows;
 }
 
-// Function to render the form for selecting slots
-function renderSlotForm($date, $record) {
-    ?>
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Schedule Appointment</title>
-    </head>
-    <body>
-        <h1>Schedule Appointment</h1>
-        <form method="POST">
-            <input type="hidden" name="date" value="<?php echo htmlspecialchars($date); ?>">
-            <?php
-            // Loop through each slot and display it in the form
-            foreach ([
-                '9-10' => '9:00 AM - 10:00 AM',
-                '10-11' => '10:00 AM - 11:00 AM',
-                '11-12' => '11:00 AM - 12:00 PM',
-                '12-1' => '12:00 PM - 1:00 PM',
-                '1-2' => '1:00 PM - 2:00 PM',
-                '2-3' => '2:00 PM - 3:00 PM',
-                '3-4' => '3:00 PM - 4:00 PM',
-                '4-5' => '4:00 PM - 5:00 PM'
-            ] as $slot_key => $slot_label):
-            ?>
-                <input type="checkbox" id="<?php echo $slot_key; ?>" name="slots[]" value="<?php echo $slot_key; ?>" <?php echo isset($record[$slot_key]) && $record[$slot_key] === 'yes' ? 'checked' : ''; ?>>
-                <label for="<?php echo $slot_key; ?>"><?php echo $slot_label; ?></label><br>
-            <?php endforeach; ?>
-            <button type="submit">Submit</button>
-        </form>
-    </body>
-    </html>
-    <?php
-}
-
-// Process the form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the selected date
-    $date = $_POST['date'];
-    $date_escaped = mysqli_real_escape_string($conn, $date);
-
-    // Check if a record already exists for the selected date and doctor ID
-    $select_query = "SELECT * FROM app WHERE date = '$date_escaped' AND d_id = '$doctor_id'";
-    $result = mysqli_query($conn, $select_query);
-
-    if (mysqli_num_rows($result) > 0) {
-        // If a record exists, update the slots
-        $record = mysqli_fetch_assoc($result);
-
-        // Loop through each selected slot and update the database
-        foreach ($_POST['slots'] as $selected_slot) {
-            // Escape the selected slot to prevent SQL injection
-            $selected_slot_escaped = mysqli_real_escape_string($conn, $selected_slot);
-
-            // Update the slot in the record
-            $record[$selected_slot_escaped] = 'yes';
-        }
-
-        // Update the record in the database
-        $update_query = "UPDATE app SET ";
-        foreach ($record as $slot_key => $value) {
-            $update_query .= "`$slot_key` = '$value', ";
-        }
-        $update_query = rtrim($update_query, ", ") . " WHERE date = '$date_escaped' AND d_id = '$doctor_id'";
-
-        if (mysqli_query($conn, $update_query)) {
-            echo "Slots updated successfully!";
-        } else {
-            echo "Error updating slots: " . mysqli_error($conn);
-        }
-    } else {
-        // If no record exists, insert a new record with the selected slots
-        $insert_query = "INSERT INTO app (d_id, date";
-        $values_query = "'$doctor_id', '$date_escaped'";
-        foreach ($_POST['slots'] as $selected_slot) {
-            // Escape the selected slot to prevent SQL injection
-            $selected_slot_escaped = mysqli_real_escape_string($conn, $selected_slot);
-
-            // Add the slot to the insert query
-            $insert_query .= ", `$selected_slot_escaped`";
-            $values_query .= ", 'yes'";
-        }
-        $insert_query .= ") VALUES ($values_query)";
-
-        if (mysqli_query($conn, $insert_query)) {
-            echo "Appointment scheduled successfully!";
-        } else {
-            echo "Error inserting appointment: " . mysqli_error($conn);
-        }
+$slotsData = [];
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $slotsData[$row['date']] = $row;
     }
 }
 
-// Close the database connection
-mysqli_close($conn);
+// Close database connection
+$conn->close();
 ?>
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Book Slot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.0/main.min.css" integrity="sha512-Y9hw2QpVj8TgvWLj96U1WVfF3XOwXmCqgF3Oh0UgJyRPm7z5osjIFG8W8KuP3+9R6+voAGlSXd6RTMDdKggyKQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .available {
+            background-color: lightgreen;
+        }
+    </style>
+</head>
+<body>
+    <h1>huuu</h1>
+    <div id='calendar'></div>
+    
+    <form id="bookingForm" method="post">
+        <input id="datePicker" type="date" name="date" required>
+        <button type="button" id="fetchSlotsButton">Fetch Time Slots</button>
+    </form>
+
+    <div id="timeSlotsTableContainer"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-+9Btqc/xE36/dl7Z6XusvzB5pI0gDlfQPHQr6TyovH/uIrT4trwQ+5LWJo83C1uXtFZKZvzDlmJrO1CEMUH+fQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/5.10.0/main.min.js" integrity="sha512-0qvT7rfQa+zVdzuhE0+XyU5Lw/P2Pmg8eBnE3Pw/Rt/L81YhSmIw5nLbSjdpjIMQQL2ssLb3lXXB0kVYjFtrtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('fetchSlotsButton').addEventListener('click', fetchTimeSlots);
+
+            function fetchTimeSlots() {
+                var selectedDate = document.getElementById('datePicker').value;
+                var url = 'fetch_timeslots.php?date=' + selectedDate;
+                
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        displayTimeSlots(data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching time slots:', error);
+                    });
+            }
+
+            function displayTimeSlots(slotsData) {
+                var container = document.getElementById('timeSlotsTableContainer');
+                container.innerHTML = ''; // Clear previous content
+
+                if (slotsData.length === 0) {
+                    container.textContent = 'No available time slots for selected date.';
+                    return;
+                }
+
+                var table = document.createElement('table');
+                var headerRow = table.insertRow();
+                headerRow.innerHTML = '<th>Time Slot</th><th>Action</th>';
+
+                slotsData.forEach(slot => {
+                    var row = table.insertRow();
+                    var timeSlotCell = row.insertCell();
+                    timeSlotCell.textContent = slot.time;
+                    var actionCell = row.insertCell();
+                    if (slot.status === 'yes') {
+                        var bookButton = document.createElement('button');
+                        bookButton.textContent = 'Book';
+                        bookButton.addEventListener('click', function() {
+                            bookSlot(slot.time);
+                        });
+                        actionCell.appendChild(bookButton);
+                    } else {
+                        actionCell.textContent = 'Not available';
+                    }
+                });
+
+                container.appendChild(table);
+            }
+
+            function bookSlot(time) {
+                var date = document.getElementById('datePicker').value;
+                var formData = new FormData();
+                formData.append('date', date);
+                formData.append('time', time);
+
+                fetch('book_slot.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data); // Handle response, e.g., show success message
+                    fetchTimeSlots(); // Refresh time slots after booking
+                })
+                .catch(error => {
+                    console.error('Error booking slot:', error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
