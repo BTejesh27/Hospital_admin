@@ -1,8 +1,6 @@
-
 <?php
-session_start(); // Start the session
+session_start();
 
-// Database connection credentials
 $host = 'localhost';
 $username = 'root';
 $password = '';
@@ -10,55 +8,60 @@ $database = 'hospital_praj';
 
 $conn = new mysqli($host, $username, $password, $database);
 
-// Check the connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check if the form is submitted
 if (isset($_POST['upload'])) {
-    // Get user input
     $D_id = $_POST["D_id"];
     $password = $_POST["password"];
 
-    // You should perform proper validation and sanitation here before querying the database
-
-    // Check if the provided credentials are valid
-    $sql = "SELECT * FROM doctors WHERE D_id = '$D_id' AND D_password = '$password'";
-    $result = $conn->query($sql);
+    $sql = "SELECT * FROM doctors WHERE D_id = ? AND D_password = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $D_id, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        // Valid credentials, store the password in a session variable
         $_SESSION['user_id'] = $D_id;
-
-        // Successful login, redirect to a protected page
-        header("Location: index.php");
+        echo '<script type="text/javascript"> 
+						window.onload = function () { 
+							window.location.href = "index.php"; 
+						}; 
+			</script> 
+		'; 
         exit;
     } else {
+<<<<<<< HEAD
         // Invalid login, display an error message
         $errorMessage = "Invalid Login. Please try again.";
+=======
+        $errorMessage = "Invalid credentials. Please try again.";
+>>>>>>> 74cdbe61eb68bcec49c114b827dc94a334cfad1b
     }
 }
 
-// Check if the registration form is submitted
 if (isset($_POST['register'])) {
-    // Get user input
     $D_id = $_POST["D_id"];
     $password = $_POST["password"];
+    $phoneNumber = $_POST["phoneNumber"];
 
-    // You should perform proper validation and sanitation here before inserting into the database
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // Insert user information into the database
-    $sql = "INSERT INTO doctors (D_id, D_password) VALUES ('$D_id', '$password')";
+    $sql = "INSERT INTO doctors (D_id, D_password, D_number) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $D_id, $hashedPassword, $phoneNumber);
 
-    if ($conn->query($sql) === TRUE) {
-        // Registration successful, you can redirect or display a success message
+    if ($stmt->execute()) {
         $successMessage = "Registration successful. You can now login.";
+        header("Location: login.php");
+        exit;
     } else {
-        // Registration failed, display an error message
-        $errorMessage = "Error: " . $sql . "<br>" . $conn->error;
+        $errorMessage = "Error: Registration failed. Please try again later.";
     }
 }
+
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,6 +69,7 @@ if (isset($_POST['register'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
     <link rel="stylesheet" href="style.css"> <!-- Link to your external CSS file -->
     <title>Tennis Tournament Admin</title>
     <style>
@@ -139,6 +143,10 @@ if (isset($_POST['register'])) {
             font-weight: bold;
         }
     </style>
+=======
+    <link rel="stylesheet" href="css/login.css">
+    <title>login</title>
+>>>>>>> 74cdbe61eb68bcec49c114b827dc94a334cfad1b
 </head>
 
 <body>
@@ -161,7 +169,42 @@ if (isset($_POST['register'])) {
             <!-- Registration message with link -->
             <p class="register-message">Don't have an account? <a href="register.php" class="register-link">Register here</a>.</p>
         </form>
+<<<<<<< HEAD
+=======
+        
+        <!-- Registration link -->
+        <p class="register-link">Don't have an account? <a href="#" onclick="toggleRegistrationForm()">Register</a></p>
     </div>
+
+    <!-- Registration form (initially hidden) -->
+    <div class="registrationForm" style="display: none;">
+        <form action="" method="post">
+            <h2>Register</h2>
+            <label for="D_id">ID:</label>
+            <input type="text" id="D_id" name="D_id" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <label for="mobile_no">Mobile Number:</label>
+            <input type="text" id="phoneNumber" name="phoneNumber" maxlength="10" required>
+            <button onclick="sendSMS()">Get OTP</button><br>
+            
+            <div class='show' style="display:none">
+                <label for="OTP">Enter OTP:</label>
+                <input type="text" id="OTP" name="OTP" maxlength="6" required>
+                <button type="button" onclick="validateOtp()" >Submit OTP</button>
+                <p id="msg"></p>
+            </div>
+            
+            <button class="reg_btn" type="submit" name="register" style='display:none'>Register</button>
+            <p class="register-link">Do you have an account? <a href="#" onclick="toggleRegistrationForm()">login</a></p>
+        </form>
+>>>>>>> 74cdbe61eb68bcec49c114b827dc94a334cfad1b
+    </div>
+
+    <!-- JavaScript to toggle form visibility -->
+    <script src="js/login.js"></script>
 </body>
 
 </html>
