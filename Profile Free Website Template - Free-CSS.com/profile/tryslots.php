@@ -75,6 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['date'])) {
 $conn->close();
 ?>
 
+
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -103,22 +104,10 @@ $conn->close();
         .available {
             background-color: lightgreen;
         }
-        /* Additional CSS for the book button */
-        button {
-            background-color: green;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: darkgreen;
-        }
     </style>
 </head>
 <body>
-    <h1>Book Slot</h1>
+    <h1>huuu</h1>
     <div id='calendar'></div>
     
     <form id="bookingForm" method="post">
@@ -202,4 +191,3 @@ $conn->close();
     </script>
 </body>
 </html>
-

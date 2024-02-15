@@ -36,7 +36,7 @@ if (isset($_POST['upload'])) {
         exit;
     } else {
         // Invalid login, display an error message
-        $errorMessage = "Invalid credentials. Please try again.";
+        $errorMessage = "Invalid Login. Please try again.";
     }
 }
 
@@ -60,114 +60,84 @@ if (isset($_POST['register'])) {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"> <!-- Link to your external CSS file -->
     <title>Tennis Tournament Admin</title>
     <style>
+        /* Inline CSS styles */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
         }
 
         .login-container {
             background-color: #fff;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
         h2 {
-            text-align: center;
-            color: #333;
+            margin-bottom: 20px;
         }
 
         label {
-            margin-bottom: 8px;
-            color: #555;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
 
-        input {
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
             padding: 10px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            border-radius: 5px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 100%;
             box-sizing: border-box;
         }
 
-        button {
-            padding: 12px;
-            background-color: #3498db;
+        button[type="submit"] {
+            background-color: #007bff;
             color: #fff;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
+            font-size: 16px;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        .register-message {
+            margin-top: 20px;
+            font-size: 14px;
         }
 
         .register-link {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .register-link a {
-            color: #3498db;
+            color: #007bff;
             text-decoration: none;
+            font-weight: bold;
         }
-        .login-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            text-align: center;
-        }
-
-        .register-form {
-            display: none; /* Initially hide the registration form */
-        }
-
-        .register-link {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .register-link a {
-            color: #3498db;
-            text-decoration: none;
-        }
-    
     </style>
 </head>
 
@@ -175,14 +145,9 @@ if (isset($_POST['register'])) {
     <div class="login-container">
         <h2>Admin Login</h2>
         <form action="" method="post">
-            <!-- You can display an error message here if set -->
+            <!-- Error message display -->
             <?php if (isset($errorMessage)) { ?>
-                <p style="color: red;"><?php echo $errorMessage; ?></p>
-            <?php } ?>
-
-            <!-- You can display a success message here if set -->
-            <?php if (isset($successMessage)) { ?>
-                <p style="color: green;"><?php echo $successMessage; ?></p>
+                <p class="error-message"><?php echo $errorMessage; ?></p>
             <?php } ?>
 
             <label for="D_id">ID:</label>
@@ -192,30 +157,10 @@ if (isset($_POST['register'])) {
             <input type="password" id="password" name="password" required>
 
             <button type="submit" name="upload">Login</button>
+
+            <!-- Registration message with link -->
+            <p class="register-message">Don't have an account? <a href="register.php" class="register-link">Register here</a>.</p>
         </form>
-
-        <!-- Registration link -->
-        <p class="register-link">Don't have an account? <a href="#" onclick="toggleRegistrationForm()">Register</a></p>
-
-        <!-- Registration form (initially hidden) -->
-        <form action="" method="post" style="display: none;" id="registrationForm">
-            <h2>Register</h2>
-            <label for="D_id">ID:</label>
-            <input type="text" id="D_id" name="D_id" required>
-
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <button type="submit" name="register">Register</button>
-        </form>
-
-        <!-- JavaScript to toggle form visibility -->
-        <script>
-            function toggleRegistrationForm() {
-                var registrationForm = document.getElementById('registrationForm');
-                registrationForm.style.display = (registrationForm.style.display === 'none') ? 'block' : 'none';
-            }
-        </script>
     </div>
 </body>
 
